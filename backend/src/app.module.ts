@@ -1,4 +1,4 @@
-import { HttpException, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
@@ -33,3 +33,4 @@ const IS_PROD = process.env.NODE_ENV === 'production';
   ],
 })
 export class AppModule {}
+
