@@ -11,6 +11,11 @@ const routes: Array<RouteConfig> = [
     component: HomeView
   },
   {
+    path: '/user',
+    name: 'sign-up',
+    component: () => import('@/views/user/signUp.vue'),
+  },
+  {
     path: '/about',
     name: 'about',
     // route level code-splitting
