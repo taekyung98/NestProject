@@ -1,23 +1,40 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {BadRequestException, Injectable} from '@nestjs/common';
 import { SignUpUserDto } from './dto/sign-up-user.dto';
 import { User, UserDocument } from './entities/user.entity';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
-import { throws } from 'assert';
+import * as crypto from 'crypto'
+import {JwtService} from "@nestjs/jwt";
 
 @Injectable()
 export class UserService {
-    constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
+    constructor(@InjectModel(User.name) private userModel: Model<UserDocument>,
+    private jwtService: JwtService) {}
+
+    private hashingPassword = (userPwd: string) => {
+        return crypto
+            .createHash('sha512')
+            .update(userPwd)
+            .digest('hex')
+            .toString();
+    };
+
 
     async signUp(signUpUserDto: SignUpUserDto): Promise<{ result: boolean }> {
-        const { userName, userEmail, userPwd } = signUpUserDto;
+        const { userEmail, userPwd } = signUpUserDto;
 
         const emailRegExp = /^([a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,6})*$/;
         if (userEmail.trim().length === 0 || !emailRegExp.test(userEmail)) {
             throw new BadRequestException('유효하지 않는 이메일 주소입니다.');
-            console.log(BadRequestException);
         }
 
+        const pwdRegex =
+            /^(?=.*[a-zA-z])(?=.*[0-9])(?=.*[$`~!@$!%*#^?&\\(\\)\-_=+]).{8,16}$/;
+        if (!pwdRegex.test(userPwd)) {
+            throw new BadRequestException(
+                '8~16자의 영문, 숫자, 특수문자 모두 조합한 형식으로 입력해주세요.',
+            );
+        }
         signUpUserDto.signDate = new Date();
         const signedUser = new this.userModel(signUpUserDto);
         await signedUser.save();
@@ -25,5 +42,36 @@ export class UserService {
         return {
             result: true,
         };
+    }
+
+    async validateUser(userEmail, userPwd) {
+        console.log('before',userPwd)
+        const pwd = this.hashingPassword(userPwd);
+        console.log('after',pwd)
+        const user = this.userModel.findOne({ userEmail, userPwd: pwd }).lean();
+        if(user){
+            return user;
+        }
+        return null;
+    }
+
+    async getByUser({ userEmail }: { userEmail: string }) {
+        return this.userModel.findOne({ userEmail }).lean();
+    }
+
+    async login(payload){
+        const token = this.jwtService.sign(payload);
+        return {
+            accessToken: token,
+            path:'/',
+            maxAge: Number('300') *
+                1000,
+        }
+    }
+
+
+    async verify(payload: any) {
+            const token = this.jwtService.sign(payload);
+            return token;
     }
 }

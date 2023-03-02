@@ -23,5 +23,6 @@ export class HttpExceptionFilter implements ExceptionFilter {
             result: false,
             message: res.message,
         });
+        console.log(res.message)
     }
 }

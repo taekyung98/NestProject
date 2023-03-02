@@ -6,6 +6,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { APP_FILTER } from '@nestjs/core';
 import { HttpExceptionFilter } from './utils/http-exception.filter';
+import { AuthModule } from './auth/auth.module';
 const IS_PROD = process.env.NODE_ENV === 'production';
 
 @Module({
@@ -22,6 +23,7 @@ const IS_PROD = process.env.NODE_ENV === 'production';
       }),
       inject: [ConfigService],
     }),
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [
