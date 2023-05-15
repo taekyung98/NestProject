@@ -11,19 +11,18 @@ import { UserService } from './user.service';
 export class LocalStrategy extends PassportStrategy(Strategy) {
   constructor(private userService: UserService) {
     super({
-      usernameField: 'userEmail',
+      usernameField: 'userId',
       passwordField: 'userPwd',
     });
   }
 
-  async validate(userEmail: string, userPwd: string): Promise<any> {
+  async validate(userId: string, userPwd: string): Promise<any> {
     try {
-      if (userEmail === '' || userPwd === '') {
+      if (userId === undefined || userPwd === undefined)
         throw new UnauthorizedException(
             '아이디 혹은 비밀번호를 입력하여 주세요.',
         );
-      }
-      const user = await this.userService.validateUser(userEmail, userPwd);
+      const user = await this.userService.validateUser(userId, userPwd);
       if (user === null) {
         throw new BadRequestException('아이디 혹은 비밀번호가 틀렸습니다.');
       }

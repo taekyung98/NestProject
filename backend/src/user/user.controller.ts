@@ -19,7 +19,7 @@ export class UserController {
     @UseGuards(AuthGuard('local'))
     @Post('/login')
     async login (@Body() loginUserDto: LoginUserDto, @Res() res){
-        const {userPwd, userEmail, ...payload} = loginUserDto
+        const {userPwd, userId, ...payload} = loginUserDto
         const { accessToken } = await this.userService.login(payload);
         return res.json({
             result: true,
@@ -28,11 +28,12 @@ export class UserController {
         })
     }
 
-    @UseGuards(JwtAuthGuard)
+
     @Get('/verify')
+    @UseGuards(JwtAuthGuard)
     async verify(@Req() req, @Body() loginUserDto: LoginUserDto) {
         const {userPwd, ...payload} = loginUserDto
-        const token = this.userService.verify(payload);
+        const token = this.userService.sign(payload);
         return {
             result: true,
             token,

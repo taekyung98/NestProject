@@ -9,13 +9,13 @@ Vue.use(Vuex)
 export interface State {
   isLogin: boolean;
   accessToken: string | null;
-  userEmail: string | null;
+  userId: string | null;
   userPwd: string | null;
 }
 
 export default new Vuex.Store<State>({
   state: {
-    userEmail: '',
+    userId: '',
     userPwd: '',
     accessToken: '',
     isLogin: false
@@ -31,25 +31,25 @@ export default new Vuex.Store<State>({
   },
   mutations: {
     // memberId를 설정
-    setMemberId(state, userEmail){
-      state.userEmail = userEmail;
+    setMemberId(state, userId){
+      state.userId = userId;
     },
     getAccessToken(state, accessToken){
       state.accessToken = accessToken;
     },
     reset(state){
-      state.userEmail = '';
+      state.userId = '';
       state.accessToken = '';
     },
-    login(state, { accessToken,userEmail, userPwd}){
+    login(state, { accessToken,userId, userPwd}){
       console.log(accessToken)
-      state.userEmail = userEmail;
+      state.userId = userId;
       state.userPwd = userPwd;
       state.accessToken = accessToken;
       state.isLogin = true;
     },
     logout(state){
-      state.userEmail = '';
+      state.userId = '';
       state.userPwd = '';
       state.accessToken = '';
       state.isLogin = false;
@@ -66,13 +66,13 @@ export default new Vuex.Store<State>({
        try {
          const { redirectUrl } = payload;
          const { data } = await axios.post('api/user/login', payload);
-         const { result, token: accessToken, userEmail } = data;
+         const { result, token: accessToken, userId } = data;
 
          // commit("login", { accessToken });
          if(result && data){
           commit('login',{
             accessToken,
-            userEmail
+            userId
           });
          }
          if (redirectUrl) {
@@ -87,6 +87,9 @@ export default new Vuex.Store<State>({
          console.log(e);
        }
      },
+    async logout({ commit }) {
+      commit('logout');
+    },
 
     async verify({ commit }) {
       try {
@@ -94,14 +97,14 @@ export default new Vuex.Store<State>({
           url: `/user/verify`,
           method: 'GET',
         });
-        const { result, token,userEmail, userPwd } = data;
+        const { result, token,userId, userPwd } = data;
         if (result && token) {
           commit('login', {
             token,
-            userEmail,
+            userId,
             userPwd,
           });
-        } else if (!result) commit('logout');
+       } else if (!result) commit('logout');
         return { result };
       } catch (e) {
         console.log(e);

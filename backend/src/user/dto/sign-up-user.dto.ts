@@ -7,6 +7,9 @@ export class SignUpUserDto {
     userName: string;
 
     @ApiProperty({ description: '아이디' })
+    @IsString()
+    userId: string;
+
     @IsEmail()
     userEmail: string;
 

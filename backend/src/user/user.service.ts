@@ -21,7 +21,7 @@ export class UserService {
 
 
     async signUp(signUpUserDto: SignUpUserDto): Promise<{ result: boolean }> {
-        const { userEmail, userPwd } = signUpUserDto;
+        const { userEmail,userId, userPwd } = signUpUserDto;
 
         const emailRegExp = /^([a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,6})*$/;
         if (userEmail.trim().length === 0 || !emailRegExp.test(userEmail)) {
@@ -35,6 +35,8 @@ export class UserService {
                 '8~16자의 영문, 숫자, 특수문자 모두 조합한 형식으로 입력해주세요.',
             );
         }
+
+        signUpUserDto.userPwd = this.hashingPassword(userPwd);
         signUpUserDto.signDate = new Date();
         const signedUser = new this.userModel(signUpUserDto);
         await signedUser.save();
@@ -44,19 +46,28 @@ export class UserService {
         };
     }
 
-    async validateUser(userEmail, userPwd) {
-        console.log('before',userPwd)
+    async validateUser(userId, userPwd) {
         const pwd = this.hashingPassword(userPwd);
-        console.log('after',pwd)
-        const user = this.userModel.findOne({ userEmail, userPwd: pwd }).lean();
+        const user = this.userModel.findOne({ userId, userPwd: pwd }).lean();
         if(user){
             return user;
+        }else{
+            throw new BadRequestException('아이디 혹은 비밀번호가 틀렸습니다.');
         }
         return null;
     }
 
-    async getByUser({ userEmail }: { userEmail: string }) {
-        return this.userModel.findOne({ userEmail }).lean();
+    async getByUser({ userId }: { userId: string }) {
+        return this.userModel.findOne({ userId }).lean();
+    }
+
+    async sign(payload: any) {
+        try {
+            const token = this.jwtService.sign(payload);
+            return token;
+        } catch (e) {
+            throw new BadRequestException(e);
+        }
     }
 
     async login(payload){
@@ -69,9 +80,4 @@ export class UserService {
         }
     }
 
-
-    async verify(payload: any) {
-            const token = this.jwtService.sign(payload);
-            return token;
-    }
 }

@@ -13,8 +13,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      ignoreExpiration: false,
       secretOrKey: jwtConstants.secret,
+      ignoreExpiration: false,
     });
   }
   /**
@@ -22,8 +22,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
    * @param payload
    */
   async validate(payload: any) {
-    const { userEmail } = payload;
-    const user = await this.userService.getByUser({ userEmail });
+    const { userId } = payload;
+    const user = await this.userService.getByUser({ userId });
     if (user === null) throw new Error(`존재하지 않는 사용자입니다.`);
     return user;
   }

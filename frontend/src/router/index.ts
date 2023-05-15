@@ -2,7 +2,9 @@ import Vue from 'vue'
 import VueRouter, { RouteConfig } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import Store from '../store/index';
+import VueDaumPostcode from "vue-daum-postcode"
 
+Vue.use(VueDaumPostcode)
 Vue.use(VueRouter)
 
 const routes: Array<RouteConfig> = [
@@ -15,6 +17,7 @@ const routes: Array<RouteConfig> = [
     path: '/sign-up',
     name: 'sign-up',
     component: () => import('@/views/user/signUp.vue'),
+    meta: { noVerify: true },
   },
   {
     path: '/login',
